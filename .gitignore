@@ -4,3 +4,6 @@ elpa/
 snippets/
 .lsp-session*
 *~
+*#
+recentf
+.dap-breakpoints

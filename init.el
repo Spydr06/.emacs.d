@@ -32,10 +32,26 @@
 
 ;; Show line numbers everywhere
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(global-display-line-numbers-mode)
 
 ;; Keyboard-centric user interface
 (tool-bar-mode -1)
+(defun my-switch-to-other-buffer ()
+  "Switch to other buffer"
+  (interactive)
+  (switch-to-buffer (other-buffer)))
+(global-set-key (kbd "M-b") 'my-switch-to-other-buffer)
+
+;; Cut, Copy, Paste
+(setq select-enable-clipboard t)
+(setq use-dialog-box nil)
+(global-set-key (kbd "C-v") 'clipboard-yank)
+;(global-set-key (kbd "C-c") 'clipboard-
+(delete-selection-mode)
+
+;; Autopair
+(add-to-list 'load-path (expand-file-name "local/" user-emacs-directory)) ;; comment if autopair.el is in standard load path 
+(require 'autopair)
+(autopair-global-mode)
 
 ;; Keybinding Panel
 (use-package which-key
@@ -67,7 +83,28 @@
     :config (load-theme 'ujelly t))
 
 ;; Startup screen
-(setq fancy-splash-image (expand-file-name "assets/icon.png" user-emacs-directory))
+(use-package dashboard
+  :ensure t
+  :config (dashboard-setup-startup-hook))
+(setq dashboard-banner-logo-title "Welcome to GNU/Emacs!")
+(setq dashboard-startup-banner 'logo)
+(setq dashboard-center-content t)
+
+;; Tab bar (Centaur Tabs)
+(use-package centaur-tabs
+  :demand
+  :config
+  (centaur-tabs-mode t))
+(centaur-tabs-change-fonts "CartographCF Nerd Font" 100)
+(setq centaur-tabs-style "box")
+(setq centaur-tabs-set-bar 'under)
+(setq x-underline-at-descent-line t)
+(setq centaur-tabs-height 20)
+(setq centaur-tabs-set-icons t)
+(global-set-key (kbd "M-<left>") 'centaur-tabs-backward)
+(global-set-key (kbd "M-<right>") 'centaur-tabs-forward)
+(setq centaur-tabs-set-modified-marker t)
+;; colors
 
 ;; Smooth scrolling
 (setq redisplay-dont-pause t
@@ -76,9 +113,30 @@
   scroll-conservatively 10000
   scroll-preserve-screen-position 1)
 
-;; Neo Tree
-(use-package neotree)
-(global-set-key [f8] 'neotree-toggle)
+;; Minimap
+(use-package sublimity)
+(sublimity-mode 1)
+(setq sublimity-scroll-weight 10
+      sublimity-scroll-drift-length 5)
+(setq sublimity-scroll-vertical-frame-delay 0.01)
+
+(setq sublimity-map-size 20)
+(setq sublimity-map-fraction 0.3)
+(setq sublimity-map-text-scale -7)
+(add-hook 'sublimity-map-setup-hook
+          (lambda ()
+            (setq buffer-face-mode-face '(:family "Monospace"))
+            (buffer-face-mode)))
+
+;; Treemacs
+(use-package treemacs
+  :ensure t
+  :defer t
+  :config
+  (progn
+    (treemacs-resize-icons 16)
+    ))
+(global-set-key (kbd "M-q") #'treemacs-select-window)
 
 ;; lsp
 (setq package-selected-packages '(lsp-mode yasnippet lsp-treemacs helm-lsp
@@ -110,6 +168,7 @@
 (add-hook 'lua-mode-hook 'lsp)
 (add-hook 'markdown-mode-hook 'lsp)
 (add-hook 'rust-mode-hook 'lsp)
+(add-hook 'lisp-mode-hook 'lsp)
 
 (setq gc-cons-threshold (* 100 1024 1024)
       read-process-output-max (* 1024 1024)
